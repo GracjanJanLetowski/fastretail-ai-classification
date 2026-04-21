@@ -22,3 +22,4 @@ Thumbs.db
 pdf_text.txt
 *.docx
 *.pdf
+generate_report.py
