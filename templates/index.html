@@ -40,7 +40,7 @@
             <div id="products-grid" class="grid">
                 {% for product in products %}
                 <div class="product-card">
-                    <div class="product-image" style="background-image: url('{{ product.s3_url }}')"></div>
+                    <div class="product-image" style="background-image: url('{{ product.display_url }}')"></div>
                     <div class="product-info">
                         <h3>{{ product.filename }}</h3>
                         <div class="labels">

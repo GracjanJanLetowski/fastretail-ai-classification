@@ -47,12 +47,28 @@ S3_BUCKET_NAME = os.getenv('AWS_S3_BUCKET_NAME')
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request, db: Session = Depends(get_db)):
     products = db.query(ProductImage).order_by(ProductImage.created_at.desc()).all()
-    # parse labels
+    
+    # Process products to parse labels and generate secure URLs
     for product in products:
+        # Parse labels
         try:
             product.parsed_labels = json.loads(product.labels)
         except:
             product.parsed_labels = []
+        
+        # Generate a secure presigned URL for viewing the image
+        # We extract the key from the stored URL (the part after the last slash)
+        try:
+            s3_key = product.s3_url.split("/")[-1]
+            presigned_url = s3_client.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': S3_BUCKET_NAME, 'Key': s3_key},
+                ExpiresIn=3600 # 1 hour
+            )
+            product.display_url = presigned_url
+        except:
+            product.display_url = product.s3_url
+
     return templates.TemplateResponse(request=request, name="index.html", context={"products": products})
 
 @app.post("/upload")
@@ -86,11 +102,12 @@ async def upload_image(file: UploadFile = File(...), db: Session = Depends(get_d
     # 2. Upload to S3
     try:
         s3_client.put_object(Bucket=S3_BUCKET_NAME, Key=unique_filename, Body=final_contents, ContentType=content_type)
+        # Store the permanent base URL in DB
         s3_url = f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/{unique_filename}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to upload to S3: {str(e)}")
 
-    # 2. Analyze with Amazon Rekognition
+    # 3. Analyze with Amazon Rekognition
     try:
         response = rekognition_client.detect_labels(
             Image={'S3Object': {'Bucket': S3_BUCKET_NAME, 'Name': unique_filename}},
@@ -101,7 +118,7 @@ async def upload_image(file: UploadFile = File(...), db: Session = Depends(get_d
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process with Rekognition: {str(e)}")
 
-    # 3. Save to database
+    # 4. Save to database
     db_product = ProductImage(
         filename=file.filename,
         s3_url=s3_url,
@@ -111,7 +128,19 @@ async def upload_image(file: UploadFile = File(...), db: Session = Depends(get_d
     db.commit()
     db.refresh(db_product)
 
-    return {"message": "Image classified successfully", "id": db_product.id, "labels": labels, "s3_url": s3_url}
+    # 5. Generate secure URL for the immediate response
+    presigned_url = s3_client.generate_presigned_url(
+        'get_object',
+        Params={'Bucket': S3_BUCKET_NAME, 'Key': unique_filename},
+        ExpiresIn=3600
+    )
+
+    return {
+        "message": "Image classified successfully", 
+        "id": db_product.id, 
+        "labels": labels, 
+        "s3_url": presigned_url # Send the secure URL to frontend
+    }
 
 @app.get("/api/products")
 def get_products(db: Session = Depends(get_db)):
