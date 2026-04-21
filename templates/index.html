@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastRetail AI | Clasificación Inteligente</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1 id="main-title">FastRetail AI</h1>
+            <p class="subtitle">Automatización de Catálogo mediante Visión Artificial</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="upload-section" class="card">
+            <h2>Subir Nuevo Producto</h2>
+            <p>Selecciona una imagen para que Amazon Rekognition la clasifique automáticamente.</p>
+            <form id="upload-form">
+                <div class="file-input-wrapper">
+                    <button class="btn btn-primary" type="button" id="browse-btn">Seleccionar Imagen</button>
+                    <input type="file" id="image-input" accept="image/*" hidden>
+                    <span id="file-name">Ningún archivo seleccionado</span>
+                </div>
+                <button type="submit" class="btn btn-success" id="upload-btn">Procesar Imagen</button>
+            </form>
+            <div id="loader" class="hidden">
+                <div class="spinner"></div>
+                <p>Analizando imagen con IA...</p>
+            </div>
+        </section>
+
+        <section id="results-section">
+            <h2>Historial de Clasificaciones</h2>
+            <div id="products-grid" class="grid">
+                {% for product in products %}
+                <div class="product-card">
+                    <div class="product-image" style="background-image: url('{{ product.s3_url }}')"></div>
+                    <div class="product-info">
+                        <h3>{{ product.filename }}</h3>
+                        <div class="labels">
+                            {% for label in product.parsed_labels %}
+                            <span class="label" title="Confianza: {{ label.Confidence }}%">
+                                {{ label.Name }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        <small>{{ product.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 FastRetail - Proyecto de Inteligencia Artificial y Big Data</p>
+    </footer>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

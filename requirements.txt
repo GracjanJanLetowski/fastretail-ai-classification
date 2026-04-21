@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-multipart
+boto3
+python-dotenv
+sqlalchemy
+python-docx
+jinja2
+Pillow
