@@ -20,4 +20,5 @@ Thumbs.db
 
 # Project specific
 pdf_text.txt
-Reporte_FastRetail_AI.docx
+*.docx
+*.pdf
