@@ -6,7 +6,8 @@ Este proyecto implementa un sistema de clasificación automática de imágenes p
 
 - **Análisis Inteligente**: Integración con **Amazon Rekognition** para la detección de etiquetas en imágenes de productos.
 - **Backend de Alto Rendimiento**: Desarrollado con **FastAPI** para una comunicación rápida y asíncrona.
-- **Normalización de Imágenes**: Procesamiento con **Pillow** para soportar múltiples formatos (WebP, PNG, JPEG) y convertirlos automáticamente al estándar de Rekognition.
+- **Normalización de Imágenes**: Procesamiento con **Pillow** para soportar cualquier formato (WebP, PNG, JPEG) y convertirlos automáticamente al estándar de Rekognition.
+- **Seguridad y Acceso**: Implementación de **URLs Presignadas** de S3 para visualizar imágenes privadas de forma segura en el navegador.
 - **Persistencia de Datos**: Almacenamiento local mediante **SQLite** y almacenamiento en la nube con **Amazon S3**.
 - **Interfaz Moderna**: Frontend limpio y funcional desarrollado con HTML5, CSS3 y Vanilla JavaScript.
 
